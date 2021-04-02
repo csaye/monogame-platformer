@@ -12,6 +12,8 @@ namespace Platformer
 
         public TileManager TileManager { get; private set; } = new TileManager();
 
+        private Player player = new Player(0, 0);
+
         public Game1()
         {
             Graphics = new GraphicsDeviceManager(this);
@@ -37,6 +39,9 @@ namespace Platformer
         {
             ProcessKeyboardState(Keyboard.GetState());
 
+            // Update player
+            player.Update(gameTime, this);
+
             base.Update(gameTime);
         }
 
@@ -46,7 +51,11 @@ namespace Platformer
 
             SpriteBatch.Begin(SpriteSortMode.BackToFront, null, SamplerState.PointClamp);
 
+            // Draw tiles
             TileManager.Draw(this);
+
+            // Draw player
+            player.Draw(this);
 
             SpriteBatch.End();
 

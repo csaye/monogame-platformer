@@ -10,6 +10,7 @@ namespace Platformer
         public static int Height { get; } = 16 * 32;
 
         public static Texture2D StoneTexture { get; private set; }
+        public static Texture2D PlayerTexture { get; private set; }
 
         public static void Initialize(Game1 game)
         {
@@ -21,6 +22,7 @@ namespace Platformer
         public static void LoadContent(Game1 game)
         {
             StoneTexture = game.Content.Load<Texture2D>("Stone");
+            PlayerTexture = game.Content.Load<Texture2D>("Player");
         }
 
         public static void DrawSprite(Texture2D texture, Rectangle rect, Game1 game, float depth)
