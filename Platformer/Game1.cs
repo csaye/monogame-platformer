@@ -1,41 +1,41 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Platformer.Tiles;
 
 namespace Platformer
 {
     public class Game1 : Game
     {
-        private GraphicsDeviceManager _graphics;
-        private SpriteBatch _spriteBatch;
+        public GraphicsDeviceManager Graphics { get; private set; }
+        public SpriteBatch SpriteBatch { get; private set; }
+
+        public TileManager TileManager { get; private set; } = new TileManager();
 
         public Game1()
         {
-            _graphics = new GraphicsDeviceManager(this);
+            Graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
         }
 
         protected override void Initialize()
         {
-            // TODO: Add your initialization logic here
-
             base.Initialize();
+
+            Drawing.Initialize(this);
         }
 
         protected override void LoadContent()
         {
-            _spriteBatch = new SpriteBatch(GraphicsDevice);
+            SpriteBatch = new SpriteBatch(GraphicsDevice);
 
-            // TODO: use this.Content to load your game content here
+            Drawing.LoadContent(this);
         }
 
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
-
-            // TODO: Add your update logic here
+            ProcessKeyboardState(Keyboard.GetState());
 
             base.Update(gameTime);
         }
@@ -44,9 +44,18 @@ namespace Platformer
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
-            // TODO: Add your drawing code here
+            SpriteBatch.Begin(SpriteSortMode.BackToFront, null, SamplerState.PointClamp);
+
+            TileManager.Draw(this);
+
+            SpriteBatch.End();
 
             base.Draw(gameTime);
+        }
+
+        private void ProcessKeyboardState(KeyboardState state)
+        {
+            if (state.IsKeyDown(Keys.Escape)) Exit();
         }
     }
 }
