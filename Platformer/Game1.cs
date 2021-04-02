@@ -9,6 +9,7 @@ namespace Platformer
     {
         public GraphicsDeviceManager Graphics { get; private set; }
         public SpriteBatch SpriteBatch { get; private set; }
+        public KeyboardState KeyboardState { get; private set; }
 
         public TileManager TileManager { get; private set; } = new TileManager();
 
@@ -37,7 +38,8 @@ namespace Platformer
 
         protected override void Update(GameTime gameTime)
         {
-            ProcessKeyboardState(Keyboard.GetState());
+            KeyboardState = Keyboard.GetState();
+            ProcessKeyboardState(KeyboardState);
 
             // Update player
             player.Update(gameTime, this);
