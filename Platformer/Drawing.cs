@@ -5,9 +5,11 @@ namespace Platformer
 {
     public static class Drawing
     {
-        public static int Grid { get; } = 32;
-        public static int Width { get; } = 16 * 32;
-        public static int Height { get; } = 16 * 32;
+        public const int Grid = 32;
+        public const int GridWidth = 32;
+        public const int GridHeight = 16;
+        public const int Width = Grid * GridWidth;
+        public const int Height = Grid * GridHeight;
 
         public static Texture2D StoneTexture { get; private set; }
         public static Texture2D PlayerTexture { get; private set; }
