@@ -14,6 +14,8 @@ namespace Platformer
         public static Texture2D StoneTexture { get; private set; }
         public static Texture2D PlayerTexture { get; private set; }
 
+        private static SpriteFont arialFont;
+
         public static void Initialize(Game1 game)
         {
             game.Graphics.PreferredBackBufferWidth = Width;
@@ -25,11 +27,18 @@ namespace Platformer
         {
             StoneTexture = game.Content.Load<Texture2D>("Stone");
             PlayerTexture = game.Content.Load<Texture2D>("Player");
+
+            arialFont = game.Content.Load<SpriteFont>("Arial");
         }
 
         public static void DrawSprite(Texture2D texture, Rectangle rect, Game1 game, float depth)
         {
             game.SpriteBatch.Draw(texture, rect, null, Color.White, 0, new Vector2(0, 0), SpriteEffects.None, depth);
+        }
+
+        public static void DrawText(string text, Vector2 position, Color color, Game1 game, float depth)
+        {
+            game.SpriteBatch.DrawString(arialFont, text, position, color, 0, new Vector2(0, 0), 1, SpriteEffects.None, depth);
         }
     }
 }

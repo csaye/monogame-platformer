@@ -13,6 +13,13 @@
 
 #---------------------------------- Content ---------------------------------#
 
+#begin Arial.spritefont
+/importer:FontDescriptionImporter
+/processor:FontDescriptionProcessor
+/processorParam:PremultiplyAlpha=True
+/processorParam:TextureFormat=Compressed
+/build:Arial.spritefont
+
 #begin Player.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -36,4 +43,3 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Stone.png
-
