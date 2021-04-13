@@ -11,10 +11,18 @@ namespace Platformer
 
         private const float Speed = 1;
 
-        private const float MaxMagnitudeX = 100;
-        private const float MaxMagnitudeY = 100;
+        private const float MaxMagnitudeX = 4;
+        private const float MaxMagnitudeY = 8;
 
-        private const float Epsilon = Drawing.Grid / 16;
+        private const float Gravity = -7;
+        private const float JumpVelocity = 5;
+
+        private const float FrictionFactor = 0.95f;
+
+        private const float Epsilon = Drawing.Grid / 8;
+        private const float FrictionEpsilon = 0.1f;
+
+        private bool grounded;
 
         private Rectangle Bounds
         {
@@ -33,10 +41,22 @@ namespace Platformer
             KeyboardState state = game.KeyboardState;
 
             // Get velocity
-            if (state.IsKeyDown(Keys.D)) velocity.X += delta * Speed;
-            if (state.IsKeyDown(Keys.A)) velocity.X -= delta * Speed;
-            if (state.IsKeyDown(Keys.S)) velocity.Y += delta * Speed;
-            if (state.IsKeyDown(Keys.W)) velocity.Y -= delta * Speed;
+            velocity.Y -= delta * Gravity;
+            bool dDown = state.IsKeyDown(Keys.D);
+            bool aDown = state.IsKeyDown(Keys.A);
+            if (dDown) velocity.X += delta * Speed;
+            if (aDown) velocity.X -= delta * Speed;
+            //if (state.IsKeyDown(Keys.S)) velocity.Y += delta * Speed;
+            //if (state.IsKeyDown(Keys.W)) velocity.Y -= delta * Speed;
+            if (grounded)
+            {
+                if (state.IsKeyDown(Keys.Space)) velocity.Y = -JumpVelocity;
+                if (!aDown && !dDown)
+                {
+                    velocity.X *= FrictionFactor;
+                    if (Math.Abs(velocity.X) < FrictionEpsilon) velocity.X = 0;
+                }
+            }
 
             // Clamp velocity
             velocity.X = Math.Clamp(velocity.X, -MaxMagnitudeX, MaxMagnitudeX);
@@ -71,6 +91,7 @@ namespace Platformer
                     position.X = (int)Math.Floor(position.X / Drawing.Grid) * Drawing.Grid;
                 }
             }
+            grounded = false;
             // Top collision
             if (velocity.Y < 0)
             {
@@ -89,6 +110,7 @@ namespace Platformer
                 {
                     velocity.Y = 0;
                     position.Y = (int)Math.Floor(position.Y / Drawing.Grid) * Drawing.Grid;
+                    grounded = true;
                 }
             }
         }
@@ -98,6 +120,7 @@ namespace Platformer
             Drawing.DrawSprite(Drawing.PlayerTexture, Bounds, game, SortingLayers.Player);
 
             Drawing.DrawText($"pos: {position}", new Vector2(8, 8), Color.White, game, SortingLayers.Text);
+            Drawing.DrawText($"vel: {velocity}", new Vector2(8, 24), Color.White, game, SortingLayers.Text);
         }
     }
 }
