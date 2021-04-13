@@ -11,8 +11,10 @@ namespace Platformer
 
         private const float Speed = 1;
 
-        private const float maxMagnitudeX = 100;
-        private const float maxMagnitudeY = 100;
+        private const float MaxMagnitudeX = 100;
+        private const float MaxMagnitudeY = 100;
+
+        private const float Epsilon = Drawing.Grid / 16;
 
         private Rectangle Bounds
         {
@@ -37,16 +39,65 @@ namespace Platformer
             if (state.IsKeyDown(Keys.W)) velocity.Y -= delta * Speed;
 
             // Clamp velocity
-            velocity.X = Math.Clamp(velocity.X, -maxMagnitudeX, maxMagnitudeX);
-            velocity.Y = Math.Clamp(velocity.Y, -maxMagnitudeY, maxMagnitudeY);
+            velocity.X = Math.Clamp(velocity.X, -MaxMagnitudeX, MaxMagnitudeX);
+            velocity.Y = Math.Clamp(velocity.Y, -MaxMagnitudeY, MaxMagnitudeY);
 
             // Move player by velocity
             position += velocity;
+
+            // Get corner positions
+            Vector2 topLeft = position;
+            Vector2 bottomLeft = position + new Vector2(0, Drawing.Grid);
+            Vector2 topRight = position + new Vector2(Drawing.Grid, 0);
+            Vector2 bottomRight = position + new Vector2(Drawing.Grid, Drawing.Grid);
+
+            // Left collision
+            if (velocity.X < 0)
+            {
+                if (game.TileManager.WallAt(topLeft + new Vector2(0, Epsilon))
+                    || game.TileManager.WallAt(bottomLeft - new Vector2(0, Epsilon)))
+                {
+                    velocity.X = 0;
+                    position.X = (int)Math.Ceiling(position.X / Drawing.Grid) * Drawing.Grid;
+                }
+            }
+            // Right collision
+            else if (velocity.X > 0)
+            {
+                if (game.TileManager.WallAt(topRight + new Vector2(0, Epsilon))
+                    || game.TileManager.WallAt(bottomRight - new Vector2(0, Epsilon)))
+                {
+                    velocity.X = 0;
+                    position.X = (int)Math.Floor(position.X / Drawing.Grid) * Drawing.Grid;
+                }
+            }
+            // Top collision
+            if (velocity.Y < 0)
+            {
+                if (game.TileManager.WallAt(topLeft + new Vector2(Epsilon, 0))
+                    || game.TileManager.WallAt(topRight - new Vector2(Epsilon, 0)))
+                {
+                    velocity.Y = 0;
+                    position.Y = (int)Math.Ceiling(position.Y / Drawing.Grid) * Drawing.Grid;
+                }
+            }
+            // Bottom collision
+            else if (velocity.Y > 0)
+            {
+                if (game.TileManager.WallAt(bottomLeft + new Vector2(Epsilon, 0))
+                    || game.TileManager.WallAt(bottomRight - new Vector2(Epsilon, 0)))
+                {
+                    velocity.Y = 0;
+                    position.Y = (int)Math.Floor(position.Y / Drawing.Grid) * Drawing.Grid;
+                }
+            }
         }
 
         public void Draw(Game1 game)
         {
             Drawing.DrawSprite(Drawing.PlayerTexture, Bounds, game, SortingLayers.Player);
+
+            Drawing.DrawText($"pos: {position}", new Vector2(8, 8), Color.White, game, SortingLayers.Text);
         }
     }
 }
