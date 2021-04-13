@@ -42,7 +42,8 @@ namespace Platformer
         {
             float delta = (float)gameTime.ElapsedGameTime.TotalSeconds; // Get delta
             KeyboardState state = game.KeyboardState; // Get keyboard state
-            tiles = game.TileManager.tiles; // Get tiles
+            //tiles = game.TileManager.tiles; // Get tiles
+            tiles = null;
 
             // Walk left and right
             if (state.IsKeyDown(Keys.A)) velocity.X -= MovementSpeed * delta;
