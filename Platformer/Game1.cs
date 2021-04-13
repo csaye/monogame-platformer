@@ -13,7 +13,7 @@ namespace Platformer
 
         public TileManager TileManager { get; private set; } = new TileManager();
 
-        private Player player = new Player(0, 0);
+        private SmoothPlayer player = new SmoothPlayer(0, 0);
 
         public Game1()
         {
