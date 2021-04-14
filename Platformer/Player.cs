@@ -19,7 +19,7 @@ namespace Platformer
 
         private const float FrictionFactor = 0.95f;
 
-        private const float Epsilon = Drawing.Grid / 8;
+        private const float Epsilon = Drawing.Grid / 4;
         private const float FrictionEpsilon = 0.1f;
 
         private bool grounded;
@@ -48,11 +48,13 @@ namespace Platformer
             bool aDown = state.IsKeyDown(Keys.A);
             if (dDown) velocity.X += delta * Speed;
             if (aDown) velocity.X -= delta * Speed;
-            //if (state.IsKeyDown(Keys.S)) velocity.Y += delta * Speed;
-            //if (state.IsKeyDown(Keys.W)) velocity.Y -= delta * Speed;
+
+            // If grounded
             if (grounded)
             {
+                // Jump
                 if (state.IsKeyDown(Keys.Space)) velocity.Y = -JumpVelocity;
+                // Slow down by friction
                 if (!aDown && !dDown)
                 {
                     velocity.X *= FrictionFactor;

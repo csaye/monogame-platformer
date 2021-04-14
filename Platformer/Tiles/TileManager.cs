@@ -1,15 +1,14 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
+using System.Text;
 
 namespace Platformer.Tiles
 {
     public class TileManager
     {
-        //public Tile[,] tiles;
-
         private readonly string Tilemap;
 
-        public const int TilesWidth = 64;
+        public const int TilesWidth = 128;
         public const int TilesHeight = 16;
         public const int Width = TilesWidth * Drawing.Grid;
         public const int Height = TilesHeight * Drawing.Grid;
@@ -17,22 +16,27 @@ namespace Platformer.Tiles
         public TileManager()
         {
             // Initialize tilemap
-            Tilemap += "................................................................";
-            Tilemap += "................................................................";
-            Tilemap += "...................###.####..###................................";
-            Tilemap += "................................................................";
-            Tilemap += ".................#..............................................";
-            Tilemap += "................................................................";
-            Tilemap += "...............#................................................";
-            Tilemap += "................................................................";
-            Tilemap += ".............#..................................................";
-            Tilemap += "................................................................";
-            Tilemap += "...........#...................................#................";
-            Tilemap += "...............................................#................";
-            Tilemap += ".........#.....................................#.............#..";
-            Tilemap += ".............................................................#..";
-            Tilemap += "################################################################";
-            Tilemap += "################################################################";
+            for (int y = 0; y < TilesHeight; y++)
+            {
+                Tilemap += GetTilemapString(y);
+            }
+        }
+
+        private string GetTilemapString(int y)
+        {
+            Random random = new Random();
+
+            StringBuilder sb = new StringBuilder();
+            for (int x = 0; x < TilesWidth; x++)
+            {
+                if (y > TilesHeight - 2 && x < 8) sb.Append('#');
+                else
+                {
+                    if (random.NextDouble() < 0.1) sb.Append('#');
+                    else sb.Append('.');
+                }
+            }
+            return sb.ToString();
         }
 
         public void Draw(Game1 game)
