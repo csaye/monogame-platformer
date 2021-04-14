@@ -24,6 +24,8 @@ namespace Platformer
 
         private bool grounded;
 
+        public Vector2 GetPosition() => position;
+
         private Rectangle Bounds
         {
             get { return new Rectangle(position.ToPoint(), new Point(Drawing.Grid)); }
@@ -118,7 +120,10 @@ namespace Platformer
         public void Draw(Game1 game)
         {
             Drawing.DrawSprite(Drawing.PlayerTexture, Bounds, game, SortingLayers.Player);
+        }
 
+        public void DrawUI(Game1 game)
+        {
             Drawing.DrawText($"pos: {position}", new Vector2(8, 8), Color.White, game, SortingLayers.Text);
             Drawing.DrawText($"vel: {velocity}", new Vector2(8, 24), Color.White, game, SortingLayers.Text);
         }

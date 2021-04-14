@@ -13,13 +13,18 @@ namespace Platformer
 
         public TileManager TileManager { get; private set; } = new TileManager();
 
-        private Player player = new Player(Drawing.Grid, Drawing.Grid);
+        private readonly Camera Camera;
+        private readonly Player Player;
 
         public Game1()
         {
             Graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
             IsMouseVisible = true;
+
+            // Initialize player and camera
+            Player = new Player(Drawing.Grid, Drawing.Grid);
+            Camera = new Camera(Player);
         }
 
         protected override void Initialize()
@@ -41,8 +46,8 @@ namespace Platformer
             KeyboardState = Keyboard.GetState();
             ProcessKeyboardState(KeyboardState);
 
-            // Update player
-            player.Update(gameTime, this);
+            Player.Update(gameTime, this); // Update player
+            Camera.Update(gameTime, this); // Update camera
 
             base.Update(gameTime);
         }
@@ -51,14 +56,13 @@ namespace Platformer
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
 
+            SpriteBatch.Begin(SpriteSortMode.BackToFront, null, SamplerState.PointClamp, transformMatrix: Camera.Transform);
+            TileManager.Draw(this); // Draw tiles
+            Player.Draw(this); // Draw player
+            SpriteBatch.End();
+
             SpriteBatch.Begin(SpriteSortMode.BackToFront, null, SamplerState.PointClamp);
-
-            // Draw tiles
-            TileManager.Draw(this);
-
-            // Draw player
-            player.Draw(this);
-
+            Player.DrawUI(this);
             SpriteBatch.End();
 
             base.Draw(gameTime);
