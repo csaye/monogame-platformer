@@ -1,129 +1,126 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using Platformer.Tiles;
 using System;
 
 namespace Platformer
 {
     public class Player
     {
-        private Tile[,] tiles;
-
         private Vector2 position;
         private Vector2 velocity;
-        private bool grounded = false;
 
-        private const float Epsilon = 0.1f;
+        private const float Speed = 2;
 
-        private const float MovementSpeed = 3;
-        private const float JumpVelocity = -5;
-        private const float Gravity = 6;
+        private const float MaxMagnitudeX = 4;
+        private const float MaxMagnitudeY = 8;
 
-        private const float maxMagnitudeX = 10;
-        private const float maxMagnitudeY = 100;
+        private const float Gravity = -7;
+        private const float JumpVelocity = 5;
 
-        public Rectangle Bounds
+        private const float FrictionFactor = 0.95f;
+
+        private const float Epsilon = Drawing.Grid / 8;
+        private const float FrictionEpsilon = 0.1f;
+
+        private bool grounded;
+
+        private Rectangle Bounds
         {
-            get
-            {
-                int x = (int)(position.X * Drawing.Grid);
-                int y = (int)(position.Y * Drawing.Grid);
-                return new Rectangle(x, y, Drawing.Grid, Drawing.Grid);
-            }
+            get { return new Rectangle(position.ToPoint(), new Point(Drawing.Grid)); }
         }
 
-        public Player(float x, float y)
+        public Player(int x, int y)
         {
             position = new Vector2(x, y);
-            velocity = new Vector2(0, 0);
         }
 
         public void Update(GameTime gameTime, Game1 game)
         {
-            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds; // Get delta
-            KeyboardState state = game.KeyboardState; // Get keyboard state
-            //tiles = game.TileManager.tiles; // Get tiles
-            tiles = null;
+            // Get delta and keyboard state
+            float delta = (float)gameTime.ElapsedGameTime.TotalSeconds;
+            KeyboardState state = game.KeyboardState;
 
-            // Walk left and right
-            if (state.IsKeyDown(Keys.A)) velocity.X -= MovementSpeed * delta;
-            if (state.IsKeyDown(Keys.D)) velocity.X += MovementSpeed * delta;
-            // Jump if grounded
-            if (grounded && state.IsKeyDown(Keys.Space)) velocity.Y = JumpVelocity;
-            // Add gravity
-            velocity.Y += Gravity * delta;
+            // Get velocity
+            velocity.Y -= delta * Gravity;
+            bool dDown = state.IsKeyDown(Keys.D);
+            bool aDown = state.IsKeyDown(Keys.A);
+            if (dDown) velocity.X += delta * Speed;
+            if (aDown) velocity.X -= delta * Speed;
+            //if (state.IsKeyDown(Keys.S)) velocity.Y += delta * Speed;
+            //if (state.IsKeyDown(Keys.W)) velocity.Y -= delta * Speed;
+            if (grounded)
+            {
+                if (state.IsKeyDown(Keys.Space)) velocity.Y = -JumpVelocity;
+                if (!aDown && !dDown)
+                {
+                    velocity.X *= FrictionFactor;
+                    if (Math.Abs(velocity.X) < FrictionEpsilon) velocity.X = 0;
+                }
+            }
 
             // Clamp velocity
-            velocity.X = Math.Clamp(velocity.X, -maxMagnitudeX, maxMagnitudeX);
-            velocity.Y = Math.Clamp(velocity.Y, -maxMagnitudeY, maxMagnitudeY);
+            velocity.X = Math.Clamp(velocity.X, -MaxMagnitudeX, MaxMagnitudeX);
+            velocity.Y = Math.Clamp(velocity.Y, -MaxMagnitudeY, MaxMagnitudeY);
 
-            // Calculate new and old positions
-            Vector2 newPosition = position + velocity * delta;
-            Console.WriteLine(newPosition);
-            int posXA = newPosition.X < 0 ? -1 : (int)newPosition.X;
-            int posXB = (int)(newPosition.X + 1 - Epsilon);
-            int posYA = newPosition.Y < 0 ? -1 : (int)newPosition.Y;
-            int posYB = (int)(newPosition.Y + 1 - Epsilon);
-            grounded = false; // Reset grounded
-            Console.WriteLine($"{posXA}, {posXB}, {posYA}, {posYB}");
+            // Move player by velocity
+            position += velocity;
 
-            // Left collision
-            if (velocity.X < 0)
-            {
-                if (TileAt(posXA, posYA) || TileAt(posXA, posYB))
-                {
-                    Console.WriteLine("left");
-                    newPosition.X = posXA + 1;
-                    velocity.X = 0;
-                }
-            }
-            // Right collision
-            else if (velocity.X > 0)
-            {
-                if (TileAt(posXA + 1, posYA) || TileAt(posXA + 1, posYB))
-                {
-                    Console.WriteLine("right");
-                    newPosition.X = posXA;
-                    velocity.X = 0;
-                }
-            }
+            // Get corner positions
+            Vector2 topLeft = position;
+            Vector2 bottomLeft = position + new Vector2(0, Drawing.Grid);
+            Vector2 topRight = position + new Vector2(Drawing.Grid, 0);
+            Vector2 bottomRight = position + new Vector2(Drawing.Grid, Drawing.Grid);
+
+            grounded = false;
             // Top collision
             if (velocity.Y < 0)
             {
-                if (TileAt(posXA, posYA) || TileAt(posXB, posYA))
+                if (game.TileManager.WallAt(topLeft + new Vector2(Epsilon, 0))
+                    || game.TileManager.WallAt(topRight - new Vector2(Epsilon, 0)))
                 {
-                    Console.WriteLine("top");
-                    newPosition.Y = posYA + 1;
                     velocity.Y = 0;
+                    position.Y = (int)Math.Ceiling(position.Y / Drawing.Grid) * Drawing.Grid;
                 }
             }
             // Bottom collision
             else if (velocity.Y > 0)
             {
-                if (TileAt(posXA, posYA + 1) || TileAt(posXB, posYA + 1))
+                if (game.TileManager.WallAt(bottomLeft + new Vector2(Epsilon, 0))
+                    || game.TileManager.WallAt(bottomRight - new Vector2(Epsilon, 0)))
                 {
-                    Console.WriteLine("bottom");
-                    newPosition.Y = posYA;
                     velocity.Y = 0;
+                    position.Y = (int)Math.Floor(position.Y / Drawing.Grid) * Drawing.Grid;
                     grounded = true;
                 }
             }
-
-            // Set new position
-            position = newPosition;
+            // Left collision
+            if (velocity.X < 0)
+            {
+                if (game.TileManager.WallAt(topLeft + new Vector2(0, Epsilon))
+                    || game.TileManager.WallAt(bottomLeft - new Vector2(0, Epsilon)))
+                {
+                    velocity.X = 0;
+                    position.X = (int)Math.Ceiling(position.X / Drawing.Grid) * Drawing.Grid;
+                }
+            }
+            // Right collision
+            else if (velocity.X > 0)
+            {
+                if (game.TileManager.WallAt(topRight + new Vector2(0, Epsilon))
+                    || game.TileManager.WallAt(bottomRight - new Vector2(0, Epsilon)))
+                {
+                    velocity.X = 0;
+                    position.X = (int)Math.Floor(position.X / Drawing.Grid) * Drawing.Grid;
+                }
+            }
         }
 
         public void Draw(Game1 game)
         {
             Drawing.DrawSprite(Drawing.PlayerTexture, Bounds, game, SortingLayers.Player);
-        }
 
-        // Returns whether tile at given position
-        private bool TileAt(int x, int y)
-        {
-            // If out of bounds, return true
-            if (x < 0 || x > tiles.GetLength(0) - 1 || y < 0 || y > tiles.GetLength(1) - 1) return true;
-            return tiles[x, y] != null;
+            Drawing.DrawText($"pos: {position}", new Vector2(8, 8), Color.White, game, SortingLayers.Text);
+            Drawing.DrawText($"vel: {velocity}", new Vector2(8, 24), Color.White, game, SortingLayers.Text);
         }
     }
 }

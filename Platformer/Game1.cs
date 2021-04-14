@@ -13,7 +13,7 @@ namespace Platformer
 
         public TileManager TileManager { get; private set; } = new TileManager();
 
-        private SmoothPlayer player = new SmoothPlayer(Drawing.Grid, Drawing.Grid);
+        private Player player = new Player(Drawing.Grid, Drawing.Grid);
 
         public Game1()
         {
